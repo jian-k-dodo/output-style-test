@@ -1,0 +1,8 @@
+{
+  "outputStyle": "j'an customized output style",
+  "permissions": {
+    "allow": [
+      "Skill(update-config)"
+    ]
+  }
+}

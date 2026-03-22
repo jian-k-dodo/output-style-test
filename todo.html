@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>할 일 목록 앱</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-blue-100 min-h-screen p-4">
+    <!--
+    ███████████████████████████████████████████████████
+    ██ 🔵 할 일 목록 앱의 동작 방식
+    ███████████████████████████████████████████████████
+
+    이 앱은 할 일을 추가하고, 완료 여부를 체크하고, 삭제하는 앱입니다.
+
+    화면 구조:
+    1. 가운데 흰 카드 안에 전체 내용이 들어있습니다
+    2. 맨 위에 할 일 입력 필드와 추가 버튼이 있습니다
+    3. 아래에 추가된 할 일들의 목록이 표시됩니다
+    4. 각 할 일마다 체크박스와 삭제 버튼이 있습니다
+    -->
+
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md">
+            <h1 class="text-4xl font-bold text-center text-purple-600 mb-8">📋 할 일 목록</h1>
+
+            <!--
+            🟦 입력 영역
+            할 일을 입력하는 영역입니다.
+            - 입력 필드: todoInput이라는 이름으로 찾을 수 있습니다
+            - 추가 버튼: addBtn이라는 이름으로 찾을 수 있습니다
+            → 버튼을 누르면 입력한 내용이 목록에 추가됩니다.
+            -->
+            <div class="flex gap-2 mb-6">
+                <input
+                    type="text"
+                    id="todoInput"
+                    placeholder="새로운 할 일을 입력하세요..."
+                    class="flex-1 px-4 py-3 border-2 border-purple-200 rounded-lg focus:outline-none focus:border-purple-500 transition"
+                >
+                <button
+                    id="addBtn"
+                    class="bg-purple-500 hover:bg-purple-600 active:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200"
+                >
+                    추가
+                </button>
+            </div>
+
+            <!--
+            🟦 목록 영역
+            할 일 목록이 여기에 표시됩니다.
+            → id="todoList"라는 이름으로 찾아서, 여기에 새로운 할 일들을 추가합니다.
+            -->
+            <div id="todoList" class="space-y-2">
+                <!-- 여기에 할 일들이 동적으로 추가됩니다 -->
+            </div>
+
+            <!--
+            🟦 빈 상태 메시지
+            모든 할 일이 완료되었을 때 보여주는 메시지입니다.
+            -->
+            <div id="emptyMessage" class="text-center py-8 text-gray-400">
+                <p class="text-lg">아직 할 일이 없습니다 😊</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /*
+        ███████████████████████████████████████████████████
+        ██ 🟢 JavaScript (앱을 움직이게 하는 부분)
+        ███████████████████████████████████████████████████
+
+        이 부분에서 할 일을 추가, 완료 체크, 삭제하는 기능을 만듭니다.
+        코드는 총 7단계로 나뉩니다.
+        */
+
+        // ─────────────────────────────────────────────────
+        // 🔴 1단계: 준비 작업
+        // ─────────────────────────────────────────────────
+        // 핵심: HTML에서 필요한 영역들을 찾아서 이름을 붙여줍니다.
+
+        const todoInput = document.getElementById('todoInput');
+        const addBtn = document.getElementById('addBtn');
+        const todoList = document.getElementById('todoList');
+        const emptyMessage = document.getElementById('emptyMessage');
+
+        // 📌 todos라는 상자에 할 일들을 저장합니다. 처음에는 비어있습니다.
+        let todos = [];
+
+        // ─────────────────────────────────────────────────
+        // 🔴 2단계: 화면을 업데이트하는 함수
+        // ─────────────────────────────────────────────────
+        // 📌 핵심: updateTodoList라는 작업을 정의합니다.
+        // 이 작업은 현재 저장된 모든 할 일을 화면에 보여줍니다.
+
+        function updateTodoList() {
+            // 1️⃣ todoList 영역을 비웁니다 (기존 내용 삭제)
+            todoList.innerHTML = '';
+
+            // 2️⃣ todos에 저장된 각 할 일을 하나씩 꺼내서 화면에 추가합니다.
+            todos.forEach((todo, index) => {
+                // 할 일 하나를 나타내는 카드를 만듭니다.
+                const todoCard = document.createElement('div');
+
+                // 📌 핵심 로직: 체크 여부에 따라 스타일을 다르게 적용합니다.
+                // 체크되면 회색으로 표시되고, 글자에 줄이 그어집니다.
+                if (todo.completed) {
+                    todoCard.className = 'flex items-center gap-3 p-4 bg-gray-100 rounded-lg border-2 border-gray-200 transition';
+                } else {
+                    todoCard.className = 'flex items-center gap-3 p-4 bg-purple-50 rounded-lg border-2 border-purple-200 hover:border-purple-400 transition';
+                }
+
+                // 3️⃣ 카드 안에 체크박스, 텍스트, 삭제 버튼을 넣습니다.
+                todoCard.innerHTML = `
+                    <!-- 체크박스 -->
+                    <input
+                        type="checkbox"
+                        ${todo.completed ? 'checked' : ''}
+                        class="w-5 h-5 cursor-pointer"
+                        onchange="toggleTodo(${index})"
+                    >
+
+                    <!-- 할 일 텍스트 (완료되면 줄이 그어집니다) -->
+                    <span class="flex-1 text-lg ${todo.completed ? 'line-through text-gray-400' : 'text-gray-800'}">
+                        ${todo.text}
+                    </span>
+
+                    <!-- 삭제 버튼 -->
+                    <button
+                        class="bg-red-500 hover:bg-red-600 active:bg-red-700 text-white font-bold py-1 px-3 rounded transition duration-200 text-sm"
+                        onclick="deleteTodo(${index})"
+                    >
+                        삭제
+                    </button>
+                `;
+
+                // 4️⃣ 만든 카드를 목록에 추가합니다.
+                todoList.appendChild(todoCard);
+            });
+
+            // 📌 핵심: 할 일이 하나도 없으면 "아직 할 일이 없습니다" 메시지를 보여줍니다.
+            if (todos.length === 0) {
+                emptyMessage.style.display = 'block';
+            } else {
+                emptyMessage.style.display = 'none';
+            }
+        }
+
+        // ─────────────────────────────────────────────────
+        // 🔴 3단계: 할 일 추가하기
+        // ─────────────────────────────────────────────────
+        // 📌 핵심: addTodo라는 작업을 정의합니다.
+        // 이 작업은 입력 필드에 적힌 텍스트를 todos 상자에 추가합니다.
+
+        function addTodo() {
+            // 1️⃣ 입력 필드에서 텍스트를 꺼냅니다.
+            const text = todoInput.value.trim();
+
+            // 2️⃣ 만약 아무것도 입력하지 않았다면 작업을 멈춥니다.
+            if (text === '') {
+                alert('할 일을 입력해주세요!');
+                return;
+            }
+
+            // 3️⃣ 📌 핵심: todos에 새로운 할 일을 추가합니다.
+            // 각 할 일은 텍스트와 완료 여부를 포함합니다.
+            todos.push({
+                text: text,
+                completed: false
+            });
+
+            // 4️⃣ 입력 필드를 비웁니다 (다음 할 일을 입력받기 위해)
+            todoInput.value = '';
+
+            // 5️⃣ 화면을 업데이트합니다.
+            updateTodoList();
+
+            // 6️⃣ 입력 필드에 커서를 두어서 바로 다음 할 일을 입력할 수 있게 합니다.
+            todoInput.focus();
+        }
+
+        // ─────────────────────────────────────────────────
+        // 🔴 4단계: 체크박스 누르기
+        // ─────────────────────────────────────────────────
+        // 📌 핵심: toggleTodo라는 작업을 정의합니다.
+        // 이 작업은 체크박스를 누르면 그 할 일의 완료 상태를 반대로 바꿉니다.
+
+        function toggleTodo(index) {
+            // 📌 핵심 로직: index 번째 할 일의 completed 값을 반대로 바꿉니다.
+            // 완료 → 미완료, 미완료 → 완료
+            todos[index].completed = !todos[index].completed;
+
+            // 화면을 업데이트합니다.
+            updateTodoList();
+        }
+
+        // ─────────────────────────────────────────────────
+        // 🔴 5단계: 할 일 삭제하기
+        // ─────────────────────────────────────────────────
+        // 📌 핵심: deleteTodo라는 작업을 정의합니다.
+        // 이 작업은 지정한 할 일을 목록에서 삭제합니다.
+
+        function deleteTodo(index) {
+            // 📌 핵심 로직: index 번째 할 일을 삭제합니다.
+            // splice는 배열에서 원하는 항목을 제거하는 작업입니다.
+            todos.splice(index, 1);
+
+            // 화면을 업데이트합니다.
+            updateTodoList();
+        }
+
+        // ─────────────────────────────────────────────────
+        // 🔴 6단계: 버튼과 엔터키 감지하기
+        // ─────────────────────────────────────────────────
+
+        // 📌 핵심: "추가" 버튼이 눌렸을 때 addTodo 작업을 실행합니다.
+        addBtn.addEventListener('click', addTodo);
+
+        // 📌 핵심: 입력 필드에서 엔터키를 눌렀을 때도 할 일을 추가합니다.
+        // 엔터키를 누르면 자동으로 추가되게 합니다.
+        todoInput.addEventListener('keypress', (event) => {
+            // 눌린 키가 엔터키인지 확인합니다.
+            if (event.key === 'Enter') {
+                addTodo();
+            }
+        });
+
+        // ─────────────────────────────────────────────────
+        // 🔴 7단계: 처음 화면 표시
+        // ─────────────────────────────────────────────────
+
+        // 📌 페이지를 열었을 때 목록을 한 번 업데이트합니다.
+        updateTodoList();
+    </script>
+</body>
+</html>

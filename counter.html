@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카운터 앱</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center">
+    <!--
+    ███████████████████████████████████████████████████
+    ██ 🔵 카운터 앱의 기본 구조와 작동 방식
+    ███████████████████████████████████████████████████
+
+    📌 앱의 전체 개요:
+    이 앱은 숫자를 증가, 감소, 초기화하는 카운터입니다.
+
+    🔸 동작 흐름:
+    1. 숫자가 처음에 0으로 시작합니다
+    2. "+1 버튼" 누르기 → 숫자가 1씩 증가합니다
+    3. "-1 버튼" 누르기 → 숫자가 1씩 감소합니다
+    4. "리셋 버튼" 누르기 → 숫자가 다시 0으로 돌아갑니다
+
+    🔸 화면 구조:
+    - 가운데에 흰색 카드가 있습니다
+    - 맨 위에 크고 굵은 숫자가 표시됩니다 (0부터 시작)
+    - 아래에 3개의 버튼이 있습니다
+
+    🔸 코드 구조:
+    1. HTML: 화면을 만드는 부분 (영역, 버튼 배치)
+    2. JavaScript: 버튼을 눌렀을 때 작동하는 부분 (숫자 변경)
+    -->
+    <div class="bg-white rounded-lg shadow-2xl p-8 w-80">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">카운터</h1>
+
+        <!--
+        🟦 숫자 표시 영역
+        현재 카운트를 보여주는 영역입니다.
+        → id="counter"라는 이름으로 JavaScript에서 찾아서 숫자를 바꿉니다.
+        처음에는 "0"이 표시되고, 버튼을 누를 때마다 이 숫자가 변합니다.
+        -->
+        <div class="bg-blue-50 rounded-lg p-8 mb-8 border-2 border-blue-200">
+            <p class="text-center text-gray-600 text-sm mb-2">현재 카운트</p>
+            <p id="counter" class="text-6xl font-bold text-center text-blue-600">0</p>
+        </div>
+
+        <!--
+        🟦 버튼 영역 (증가/감소)
+        +1 버튼과 -1 버튼이 나란히 있습니다.
+        → increaseBtn: 숫자를 1씩 증가시킵니다
+        → decreaseBtn: 숫자를 1씩 감소시킵니다
+        각 버튼에 id를 붙여서 JavaScript에서 찾을 수 있습니다.
+        -->
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <button id="decreaseBtn" class="bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 text-xl">
+                -1
+            </button>
+            <button id="increaseBtn" class="bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 text-xl">
+                +1
+            </button>
+        </div>
+
+        <!--
+        🟦 리셋 버튼
+        리셋 버튼입니다. 이 버튼을 누르면 숫자가 0으로 돌아갑니다.
+        → resetBtn이라는 이름으로 찾을 수 있습니다.
+        -->
+        <button id="resetBtn" class="w-full bg-blue-400 hover:bg-blue-500 active:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+            리셋
+        </button>
+    </div>
+
+    <script>
+        /*
+        ███████████████████████████████████████████████████
+        ██ 🟢 JavaScript (앱을 움직이게 하는 부분)
+        ███████████████████████████████████████████████████
+
+        이 부분에서 버튼을 눌렀을 때 어떻게 작동하는지 정의합니다.
+        코드는 총 5단계로 나뉩니다.
+        */
+
+        // ─────────────────────────────────────────────────
+        // 🔴 1단계: 준비 작업
+        // ─────────────────────────────────────────────────
+        // 핵심: 숫자를 저장할 상자와 HTML 요소들을 준비합니다.
+
+        // 📌 count라는 상자를 만들고 0을 넣어둡니다.
+        // 이것이 현재 숫자를 기억하는 상자입니다.
+        let count = 0;
+
+        // 📌 HTML에서 만든 영역들을 찾아서 이름을 붙여줍니다.
+        // 마치 "숫자를 보여주는 영역은 counterDisplay라고 부르겠다"는 뜻입니다.
+        const counterDisplay = document.getElementById('counter');
+        const increaseBtn = document.getElementById('increaseBtn');
+        const decreaseBtn = document.getElementById('decreaseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // ─────────────────────────────────────────────────
+        // 🔴 2단계: 화면에 숫자를 보여주는 함수
+        // ─────────────────────────────────────────────────
+        // 📌 핵심: updateDisplay라는 작업을 정의합니다.
+        // 이 작업은 현재 count 값(숫자)을 화면에 표시합니다.
+
+        function updateDisplay() {
+            // 📌 counterDisplay 영역에 count의 값을 보여줍니다.
+            // 예: count가 5이면 화면에 "5"가 표시됩니다.
+            counterDisplay.textContent = count;
+        }
+
+        // ─────────────────────────────────────────────────
+        // 🔴 3단계: +1 버튼 누르기
+        // ─────────────────────────────────────────────────
+        // 📌 핵심: "+1 버튼이 눌렸을 때 이 작업을 하세요"라고 정의합니다.
+
+        increaseBtn.addEventListener('click', () => {
+            // 1️⃣ count 값에 1을 더합니다 (2 → 3, 5 → 6 등)
+            count++;
+
+            // 2️⃣ 화면을 업데이트해서 새로운 숫자를 보여줍니다.
+            updateDisplay();
+        });
+
+        // ─────────────────────────────────────────────────
+        // 🔴 4단계: -1 버튼 누르기
+        // ─────────────────────────────────────────────────
+        // 📌 핵심: "-1 버튼이 눌렸을 때 이 작업을 하세요"라고 정의합니다.
+
+        decreaseBtn.addEventListener('click', () => {
+            // 1️⃣ count 값에서 1을 뺍니다 (5 → 4, 2 → 1 등)
+            count--;
+
+            // 2️⃣ 화면을 업데이트해서 새로운 숫자를 보여줍니다.
+            updateDisplay();
+        });
+
+        // ─────────────────────────────────────────────────
+        // 🔴 5단계: 리셋 버튼 누르기
+        // ─────────────────────────────────────────────────
+        // 📌 핵심: "리셋 버튼이 눌렸을 때 이 작업을 하세요"라고 정의합니다.
+
+        resetBtn.addEventListener('click', () => {
+            // 1️⃣ 📌 핵심 로직: count 값을 0으로 돌려놓습니다.
+            // 어떤 숫자든 0으로 초기화됩니다.
+            count = 0;
+
+            // 2️⃣ 화면을 업데이트해서 0을 보여줍니다.
+            updateDisplay();
+        });
+
+        // ─────────────────────────────────────────────────
+        // 🔴 초기화: 처음 화면 표시
+        // ─────────────────────────────────────────────────
+
+        // 📌 페이지를 열었을 때 화면을 한 번 업데이트합니다.
+        // 이렇게 해서 처음부터 "0"이 표시됩니다.
+        updateDisplay();
+    </script>
+</body>
+</html>
